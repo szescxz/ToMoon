@@ -259,9 +259,9 @@ impl Default for Clash {
 
 impl Clash {
     pub fn run(&mut self, config_path: &String, skip_proxy: bool) -> Result<(), ClashError> {
-        //没有 Country.mmdb
-        let country_db_path = "/root/.config/clash/Country.mmdb";
-        if let Some(parent) = PathBuf::from(country_db_path).parent() {
+        //没有 GeoIP.dat
+        let geoip_dat_path = "/root/.config/clash/GeoIP.dat";
+        if let Some(parent) = PathBuf::from(geoip_dat_path).parent() {
             if let Err(e) = std::fs::create_dir_all(parent) {
                 log::error!("Failed while creating /root/.config/clash dir.");
                 log::error!("Error Message:{}", e);
@@ -271,16 +271,16 @@ impl Clash {
                 });
             }
         }
-        let new_country_db_path = get_current_working_dir()
+        let new_geoip_dat_path = get_current_working_dir()
             .unwrap()
-            .join("bin/core/Country.mmdb");
-        if !PathBuf::from(country_db_path).is_file() {
-            match fs::copy(new_country_db_path, country_db_path) {
+            .join("bin/core/GeoIP.dat");
+        if !PathBuf::from(geoip_dat_path).is_file() {
+            match fs::copy(new_geoip_dat_path, geoip_dat_path) {
                 Ok(_) => {
-                    log::info!("cp Country.mmdb to .clash dir");
+                    log::info!("cp GeoIP.dat to .clash dir");
                 }
                 Err(e) => {
-                    log::info!("Error occurred while coping Country.mmdb");
+                    log::info!("Error occurred while copying GeoIP.dat");
                     return Err(ClashError {
                         Message: e.to_string(),
                         ErrorKind: ClashErrorKind::CpDbError,

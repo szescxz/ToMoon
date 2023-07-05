@@ -18,6 +18,10 @@ jobs:
       - name: download asset files
         run: wget https://github.com/YukiCoco/ToMoon/releases/download/build/build_assets.zip
       - run: unzip -n build_assets.zip -d tmp/
+
+      - name: Download GeoIP
+        run: wget "https://github.com/MetaCubeX/meta-rules-dat/raw/release/geoip.dat" -O tmp/core/GeoIP.dat
+
       # build front-end start
       - uses: actions/setup-node@v3
         with:
