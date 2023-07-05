@@ -204,8 +204,7 @@ fn get_current_working_dir() -> std::io::Result<std::path::PathBuf> {
 pub struct Clash {
     pub path: std::path::PathBuf,
     pub config: std::path::PathBuf,
-    pub instence: Option<Child>,
-    pub smartdns_instence: Option<Child>,
+    pub instence: Option<Child>
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -253,8 +252,7 @@ impl Default for Clash {
             config: get_current_working_dir()
                 .unwrap()
                 .join("bin/core/config.yaml"),
-            instence: None,
-            smartdns_instence: None,
+            instence: None
         }
     }
 }
@@ -301,20 +299,6 @@ impl Clash {
                 });
             }
         }
-        //在 clash 启动前修改 DNS
-        //先结束 systemd-resolve ，否则会因为端口占用启动失败
-        match helper::set_system_network() {
-            Ok(_) => {
-                log::info!("Successfully set network status");
-            }
-            Err(e) => {
-                log::error!("Error occurred while setting system network: {}", e);
-                return Err(ClashError {
-                    Message: e.to_string(),
-                    ErrorKind: ClashErrorKind::NetworkError,
-                });
-            }
-        }
 
         //log::info!("Pre-setting network");
         //TODO: 未修改的 unwarp
@@ -323,26 +307,6 @@ impl Clash {
             .join("bin/core/running_config.yaml");
         let outputs = fs::File::create("/tmp/tomoon.clash.log").unwrap();
         let errors = outputs.try_clone().unwrap();
-
-        let smartdns_path = get_current_working_dir()
-            .unwrap()
-            .join("bin/smartdns/smartdns");
-
-        let smartdns_config_path = get_current_working_dir()
-            .unwrap()
-            .join("bin/smartdns/config.conf");
-
-        // let smartdns_outputs = fs::File::create("/tmp/tomoon.smartdns.log").unwrap();
-        // let smartdns_errors = outputs.try_clone().unwrap();
-
-        // 启动 SmartDNS 作为 DNS 上游
-        let smart_dns = Command::new(smartdns_path)
-            .arg("-c")
-            .arg(smartdns_config_path)
-            .arg("-f")
-            // .stdout(smartdns_outputs)
-            // .stderr(smartdns_errors)
-            .spawn();
 
         let clash = Command::new(self.path.clone())
             .arg("-f")
@@ -359,7 +323,6 @@ impl Clash {
             }
         };
         self.instence = Some(clash.unwrap());
-        self.smartdns_instence = Some(smart_dns.unwrap());
         Ok(())
     }
 
@@ -387,16 +350,6 @@ impl Clash {
             None => {
                 //Not launch Clash yet...
                 log::error!("Error occurred while disabling Clash: Not launch Clash yet");
-            }
-        };
-        let smartdns_instance = self.smartdns_instence.as_mut();
-        match smartdns_instance {
-            Some(x) => {
-                x.kill()?;
-                x.wait()?;
-            }
-            None => {
-                log::error!("Error occurred while disabling SmartDNS : Not launch SmartDNS yet");
             }
         };
         Ok(())
@@ -471,7 +424,7 @@ impl Clash {
             }
         }
 
-        //修改 TUN 和 DNS 配置
+        //修改 TUN 配置
 
         let tun_config = "
         enable: true
@@ -479,31 +432,6 @@ impl Clash {
         auto-route: true
         auto-detect-interface: true
         ";
-
-        //部分配置来自 https://www.xkww3n.cyou/2022/02/08/use-clash-dns-anti-dns-hijacking/
-
-        let dns_config = match helper::is_resolve_running() {
-            true => {
-                "
-        enable: true
-        listen: 0.0.0.0:5354
-        enhanced-mode: fake-ip
-        fake-ip-range: 198.18.0.1/16
-        nameserver:
-            - tcp://127.0.0.1:5353
-        "
-            }
-            false => {
-                "
-        enable: true
-        listen: 0.0.0.0:53
-        enhanced-mode: fake-ip
-        fake-ip-range: 198.18.0.1/16
-        nameserver:
-            - tcp://127.0.0.1:5353
-        "
-            }
-        };
 
         let profile_config = "
         store-selected: true
@@ -523,17 +451,6 @@ impl Clash {
             }
             None => {
                 insert_config(yaml, tun_config, "tun");
-            }
-        }
-
-        match yaml.get("dns") {
-            Some(_) => {
-                //删除 DNS 配置
-                yaml.remove("dns").unwrap();
-                insert_config(yaml, dns_config, "dns");
-            }
-            None => {
-                insert_config(yaml, dns_config, "dns");
             }
         }
 

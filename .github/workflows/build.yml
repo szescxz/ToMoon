@@ -75,7 +75,6 @@ jobs:
               cp plugin.json ./release/tomoon/plugin.json
               cp package.json ./release/tomoon/package.json
               cp -r ./tmp/core ./release/tomoon/bin/
-              cp -r ./tmp/smartdns ./release/tomoon/bin/
               cp -r ./tomoon-web/dist ./release/tomoon/web
               cd ./release 
               zip -r tomoon-${{ env.RELEASE_VERSION }}.zip tomoon
