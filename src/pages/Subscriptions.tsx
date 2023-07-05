@@ -124,7 +124,7 @@ export const Subscriptions: VFC<SubProp> = ({ Subscriptions }) => {
             </style>
             <PanelSectionRow>
                 <div id="subscription-qrcode">
-                    <QRCodeCanvas value={QRPageUrl} size={128} marginSize={4} />
+                    <QRCodeCanvas value={QRPageUrl} size={128} includeMargin={true} />
                 </div>
                 <div id="subscription-download-textfiled" style={cleanPadding}>
                     <TextField
