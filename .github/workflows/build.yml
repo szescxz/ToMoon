@@ -19,6 +19,28 @@ jobs:
         run: wget https://github.com/YukiCoco/ToMoon/releases/download/build/build_assets.zip
       - run: unzip -n build_assets.zip -d tmp/
 
+      - name: Get latest prebuilt Clash.Meta download link
+        uses: actions/github-script@v6
+        id: core-download-link
+        with:
+          script: |
+            const resp = await github.rest.repos.getLatestRelease({
+              owner: 'MetaCubeX',
+              repo: 'Clash.Meta'
+            })
+            const version = resp.data.tag_name
+            for (const asset of resp.data.assets)
+            {
+              if (asset.name == `clash.meta-linux-amd64-${version}.gz`)
+              {
+                return asset.browser_download_url
+              }
+            }
+          result-encoding: string
+      - name: Download prebuilt Clash.Meta
+        env:
+          DOWNLOAD_LINK: ${{ steps.core-download-link.outputs.result }}
+        run: wget "${DOWNLOAD_LINK}" -O - | gunzip -c > tmp/core/clash
       - name: Download GeoIP
         run: wget "https://github.com/MetaCubeX/meta-rules-dat/raw/release/geoip.dat" -O tmp/core/GeoIP.dat
 
