@@ -482,28 +482,23 @@ impl Clash {
 
         //部分配置来自 https://www.xkww3n.cyou/2022/02/08/use-clash-dns-anti-dns-hijacking/
 
-        let dns_config = match helper::is_resolve_running() {
-            true => {
-                "
+        let dns_config = format!("
         enable: true
-        listen: 0.0.0.0:5354
+        listen: {}
         enhanced-mode: fake-ip
         fake-ip-range: 198.18.0.1/16
         nameserver:
             - tcp://127.0.0.1:5353
-        "
+        nameserver-policy:
+            \"test.steampowered.com\": \"114.114.114.114\"
+        ", match helper::is_resolve_running() {
+            true => {
+                "0.0.0.0:5354"
             }
             false => {
-                "
-        enable: true
-        listen: 0.0.0.0:53
-        enhanced-mode: fake-ip
-        fake-ip-range: 198.18.0.1/16
-        nameserver:
-            - tcp://127.0.0.1:5353
-        "
+                "0.0.0.0:53"
             }
-        };
+        });
 
         let profile_config = "
         store-selected: true
@@ -530,10 +525,10 @@ impl Clash {
             Some(_) => {
                 //删除 DNS 配置
                 yaml.remove("dns").unwrap();
-                insert_config(yaml, dns_config, "dns");
+                insert_config(yaml, dns_config.as_str(), "dns");
             }
             None => {
-                insert_config(yaml, dns_config, "dns");
+                insert_config(yaml, dns_config.as_str(), "dns");
             }
         }
 
