@@ -1,4 +1,4 @@
-import { PanelSectionRow, TextField, ButtonItem } from "decky-frontend-lib";
+import { PanelSectionRow, TextField, ButtonItem, ServerAPI, FileSelectionType } from "decky-frontend-lib";
 import { useReducer, useState, VFC } from "react";
 import { cleanPadding } from "../style";
 import { SubList } from "./components/SubList";
@@ -8,10 +8,11 @@ import * as backend from "../backend";
 import axios from "axios";
 
 interface SubProp {
+    serverAPI: ServerAPI,
     Subscriptions: Array<any>,
 }
 
-export const Subscriptions: VFC<SubProp> = ({ Subscriptions }) => {
+export const Subscriptions: VFC<SubProp> = ({ serverAPI, Subscriptions }) => {
     const [text, setText] = useState("");
     const [downloadTips, setDownloadTips] = useState("");
     const [subscriptions, updateSubscriptions] = useState(Subscriptions);
@@ -133,6 +134,20 @@ export const Subscriptions: VFC<SubProp> = ({ Subscriptions }) => {
                         onChange={(e) => setText(e?.target.value)}
                         description={downloadTips}
                     />
+                    <ButtonItem onClick={() => {
+                        serverAPI.openFilePickerV2(
+                            FileSelectionType.FILE,
+                            "/home/deck", // TODO Read from environ DECKY_USER_HOME
+                            true,
+                            true,
+                            undefined,
+                            ['yaml'],
+                            false,
+                            false
+                        ).then((val) => {
+                            setText(`file://${val.path}`);
+                        });
+                    }}>Browse</ButtonItem>
                 </div>
                 <ButtonItem layout="below" disabled={downlaodBtnDisable} onClick={() => {
                     setDownlaodBtnDisable(true);

@@ -29,6 +29,7 @@ let enabledSkipProxy = false;
 let usdplReady = false;
 let subs: any[];
 let subs_option: any[];
+let serverAPIGlobal: ServerAPI;
 
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ }) => {
@@ -226,7 +227,7 @@ const DeckyPluginRouterTest: VFC = () => {
       pages={[
         {
           title: "Subscriptions",
-          content: <Subscriptions Subscriptions={subs} />,
+          content: <Subscriptions serverAPI={serverAPIGlobal} Subscriptions={subs} />,
           route: "/tomoon-config/subscriptions"
         },
         {
@@ -259,6 +260,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     })
   })();
 
+  serverAPIGlobal = serverApi;
 
   serverApi.routerHook.addRoute("/tomoon-config", DeckyPluginRouterTest);
 
