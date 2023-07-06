@@ -18,39 +18,6 @@ pub fn is_resolve_running() -> bool {
     false
 }
 
-pub fn reset_system_network() -> Result<(), Box<dyn std::error::Error>> {
-    //读入程序的 DNS
-    let default_config = "[main]\ndns=auto";
-    fs::write("/etc/NetworkManager/conf.d/dns.conf", default_config)?;
-    // 修改 DNS 为可写
-    Command::new("chattr")
-        .arg("-i")
-        .arg("/etc/resolv.conf")
-        .spawn()
-        .unwrap()
-        .wait()
-        .unwrap();
-    //fs::copy("./resolv.conf.bk", "/etc/resolv.conf")?;
-
-    // 更新 NetworkManager
-    Command::new("nmcli")
-        .arg("general")
-        .arg("reload")
-        .spawn()
-        .unwrap()
-        .wait()
-        .unwrap();
-    // match fs::copy("./resolv.conf.bk", "/etc/resolv.conf") {
-    //     Ok(_) => (),
-    //     Err(e) => {
-    //         log::error!("reset_network() error: {}", e);
-    //         return vec![];
-    //     }
-    // }
-    log::info!("Successfully reset network");
-    Ok(())
-}
-
 pub fn get_current_working_dir() -> std::io::Result<std::path::PathBuf> {
     std::env::current_dir()
 }

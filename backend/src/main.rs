@@ -50,7 +50,6 @@ async fn main() -> Result<(), std::io::Error> {
         Instance::new(PORT)
             .register("set_clash_status", api::set_clash_status(&runtime))
             .register("get_clash_status", api::get_clash_status(&runtime))
-            .register("reset_network", api::reset_network())
             .register("download_sub", api::download_sub(&runtime))
             .register("get_download_status", api::get_download_status(&runtime))
             .register("get_sub_list", api::get_sub_list(&runtime))

@@ -114,33 +114,6 @@ impl ControlRuntime {
             if !helper::is_clash_running() && v.enable {
                 v.enable = false;
                 drop(v);
-                //刷新网卡
-                match helper::reset_system_network() {
-                    Ok(_) => {}
-                    Err(e) => {
-                        log::error!("runtime failed to acquire settings write lock: {}", e);
-                    }
-                }
-            }
-        }
-
-        //保存复原脚本
-        if !Path::new("/home/deck/tomoon_recover.sh").exists() {
-            let recover_script = r#"sudo chattr -i /etc/resolv.conf
-sudo systemctl stop systemd-resolved
-sudo chmod a+w /etc/NetworkManager/conf.d/dns.conf
-sudo echo -e "[main]\ndns=auto"  > /etc/NetworkManager/conf.d/dns.conf
-sudo nmcli general reload"#;
-            match fs::write("/home/deck/tomoon_recover.sh", recover_script) {
-                Ok(_) => {
-                    log::info!("Write recover script to /home/deck/tomoon_recover.sh");
-                }
-                Err(e) => {
-                    log::error!(
-                        "Error occurred while writing recover script, Error msg: {}",
-                        e.to_string()
-                    );
-                }
             }
         }
 
@@ -332,20 +305,6 @@ impl Clash {
             Some(x) => {
                 x.kill()?;
                 x.wait()?;
-
-                // 复原 DNS
-                //弃用，因为可能是在中途换过 WiFi 导致原有 DNS 失效
-                // Command::new("chattr")
-                //     .arg("-i")
-                //     .arg("/etc/resolv.conf")
-                //     .spawn()
-                //     .unwrap()
-                //     .wait()
-                //     .unwrap();
-                // fs::copy("./resolv.conf.bk", "/etc/resolv.conf")?;
-
-                //直接重置网络
-                helper::reset_system_network()?;
             }
             None => {
                 //Not launch Clash yet...

@@ -198,22 +198,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ }) => {
           </div>
         </PanelSectionRow>
       </PanelSection>
-
-      <PanelSection title="Tools">
-        <PanelSectionRow>
-          <ButtonItem
-            layout="below"
-            onClick={() => {
-              backend.resolve(backend.resetNetwork(), () => {
-                Router.CloseSideMenus();
-                console.log("reset network");
-              });
-            }}
-          >
-            Reset Network
-          </ButtonItem>
-        </PanelSectionRow>
-      </PanelSection>
     </PanelSection>
   );
 };

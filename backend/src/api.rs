@@ -125,20 +125,6 @@ pub fn set_clash_status(runtime: &ControlRuntime) -> impl Fn(Vec<Primitive>) -> 
     }
 }
 
-pub fn reset_network() -> impl Fn(Vec<Primitive>) -> Vec<Primitive> {
-    |_| {
-        match helper::reset_system_network() {
-            Ok(_) => (),
-            Err(e) => {
-                log::error!("Error occured while reset_network() : {}", e);
-                return vec![];
-            }
-        }
-        log::info!("Successfully reset network");
-        return vec![];
-    }
-}
-
 pub fn download_sub(runtime: &ControlRuntime) -> impl Fn(Vec<Primitive>) -> Vec<Primitive> {
     let download_status = runtime.downlaod_status_clone();
     let runtime_state = runtime.state_clone();
