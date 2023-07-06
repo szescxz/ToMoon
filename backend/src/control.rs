@@ -231,7 +231,7 @@ impl Default for Clash {
 }
 
 impl Clash {
-    pub fn run(&mut self, config_path: &String, skip_proxy: bool) -> Result<(), ClashError> {
+    pub fn run(&mut self, config_path: &String) -> Result<(), ClashError> {
         //没有 GeoIP.dat
         let geoip_dat_path = "/root/.config/clash/GeoIP.dat";
         if let Some(parent) = PathBuf::from(geoip_dat_path).parent() {
@@ -263,7 +263,7 @@ impl Clash {
         }
         self.update_config_path(config_path);
         // 修改配置文件为推荐配置
-        match self.change_config(skip_proxy) {
+        match self.change_config() {
             Ok(_) => (),
             Err(e) => {
                 return Err(ClashError {
@@ -318,7 +318,7 @@ impl Clash {
         self.config = std::path::PathBuf::from((*path).clone());
     }
 
-    pub fn change_config(&self, skip_proxy: bool) -> Result<(), Box<dyn error::Error>> {
+    pub fn change_config(&self) -> Result<(), Box<dyn error::Error>> {
         let path = self.config.clone();
         let config = fs::read_to_string(path)?;
         let mut yaml: serde_yaml::Value = serde_yaml::from_str(config.as_str())?;
@@ -335,23 +335,6 @@ impl Clash {
                     Value::String(String::from("external-controller")),
                     Value::String(String::from("127.0.0.1:9090")),
                 );
-            }
-        }
-
-        //修改 test.steampowered.com
-        //这个域名用于 Steam Deck 网络连接验证，可以直连
-        if let Some(x) = yaml.get_mut("rules") {
-            let rules = x.as_sequence_mut().unwrap();
-            rules.insert(
-                0,
-                Value::String(String::from("DOMAIN,test.steampowered.com,DIRECT")),
-            );
-
-            if skip_proxy {
-                rules.insert(
-                0,
-                Value::String(String::from("DOMAIN-SUFFIX,cm.steampowered.com,DIRECT")),
-            );
             }
         }
 

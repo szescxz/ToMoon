@@ -9,16 +9,10 @@ pub struct Settings {
     pub enable: bool,
     #[serde(default = "default_tun_mode")]
     pub tun_mode: bool,
-    #[serde(default = "default_skip_proxy")]
-    pub skip_proxy: bool,
     #[serde(default = "default_current_sub")]
     pub current_sub: String,
     #[serde(default = "default_subscriptions")]
     pub subscriptions: Vec<Subscription>,
-}
-
-fn default_skip_proxy() -> bool {
-    true
 }
 
 fn default_enable() -> bool {
@@ -121,7 +115,6 @@ impl Default for Settings {
         Self {
             enable: false,
             tun_mode: true,
-            skip_proxy: true,
             current_sub: default_profile.to_string_lossy().to_string(),
             subscriptions: Vec::new()
         }
